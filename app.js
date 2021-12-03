@@ -69,9 +69,20 @@ app.get('/total', (req,res) => {
     });
 });
 
+
+app.get('/instock', (req,res) => {
+    let sql_select_in_stock = `SELECT * FROM orderTbl`;
+    db.query(sql_select_in_stock, (err, result) => {
+        if(err) throw err;
+        console.log(result);
+        res.send(result);
+    });
+});
+
+
 app.get('/outofstock', (req,res) => {
-    let sql_sum_price = `SELECT * FROM outOfStockTbl`;
-    db.query(sql_sum_price, (err, result) => {
+    let sql_select_out_stock = `SELECT * FROM outOfStockTbl`;
+    db.query(sql_select_out_stock, (err, result) => {
         if(err) throw err;
         console.log(result);
         res.send(result);
@@ -95,7 +106,7 @@ app.get('/getitems/:id', (req, res) => {
         var discount = (oItems[6].substring(11).replace(/"/gi, ''));
     
         console.log(`${itemId}, ${sku}, ${name}, ${price}, ${quantity}, ${type}, ${discount}`);
-        var msg = `${name} ${price}`
+        
         
         if (quantity < 1){
             let sql_insert_order_tbl = `INSERT INTO outOfStockTbl(itemId, itemName) VALUES(${itemId}, ${name})`;
@@ -108,8 +119,14 @@ app.get('/getitems/:id', (req, res) => {
             db.query(sql_insert_order_tbl, (err, results) => {
                 if(err) throw err;
             })
+            res.send(o);
+            let sql_update_new_quantity_val = `UPDATE Inventory SET quantity = ${quantity - 1} WHERE id = ${req.params.id}`;
+            db.query(sql_update_new_quantity_val, (err, results) => {
+                if(err) throw err;
+                let QuantityLeftMsg = `After this transaction we will have ${quantity - 1} left in stock`;
+                console.log(QuantityLeftMsg);
+            })
         }
-        res.send(o);
     });
 });
         
@@ -135,10 +152,6 @@ app.get('/getitems/:id', (req, res) => {
 
 
 
-//let sql1 = `CREATE TABLE orderTbl(id INT NOT NULL AUTO_INCREMENT, itemId int, itemName VARCHAR(30), 
-//itemPrice VARCHAR(30), PRIMARY KEY(id))`;
-    //let query = db.query(sql1, (err, results) => {
-    //    if(err) throw err;
 
 
 
