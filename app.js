@@ -151,6 +151,7 @@ app.get("/getitems/:id", (req, res) => {
 //})
 
 app.get("/", (req, res) => {
+    console.log("hello world");
     res.send([1, 2, 3]);
 });
 
