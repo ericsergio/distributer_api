@@ -26,13 +26,13 @@ function Invoice(balance /*,items = []*/) {
     //this.date = date;
 }
 
-app.get("/createordertable", (req, res) => {
+app.get("/createordertable", async (req, res) => {
     let sql_drop_outofstock_tbl = "DROP TABLE IF EXISTS outOfStockTbl";
-    db.query(sql_drop_outofstock_tbl, (err, result) => {
+    await db.query(sql_drop_outofstock_tbl, (err, result) => {
         if (err) throw err;
         console.log(result);
     });
-    let sql_drop_order_tbl = "DROP TABLE IF EXISTS orderTbl";
+    await let sql_drop_order_tbl = "DROP TABLE IF EXISTS orderTbl";
     db.query(sql_drop_order_tbl, (err, result) => {
         if (err) throw err;
         console.log(result);
@@ -40,15 +40,13 @@ app.get("/createordertable", (req, res) => {
     //-------------
     let sql_create_outofstock_tbl =
         "CREATE TABLE outOfStockTbl(id INT NOT NULL AUTO_INCREMENT, itemId INT, itemName VARCHAR(130), PRIMARY KEY(id))";
-    db.query(sql_create_outofstock_tbl, (err, result) => {
+    await db.query(sql_create_outofstock_tbl, (err, result) => {
         if (err) throw err;
         console.log(result);
     });
     //------------
-    let sql_create_order_tbl =
-        "CREATE TABLE orderTbl(id INT NOT NULL AUTO_INCREMENT, itemId int, itemName VARCHAR(130), \
-    itemPrice DECIMAL(5,2), PRIMARY KEY(id))";
-    db.query(sql_create_order_tbl, (err, result) => {
+    let sql_create_order_tbl = "CREATE TABLE orderTbl(id INT NOT NULL AUTO_INCREMENT, itemId int, itemName VARCHAR(130), \itemPrice DECIMAL(5,2), PRIMARY KEY(id))";
+    await db.query(sql_create_order_tbl, (err, result) => {
         if (err) throw err;
         console.log(result);
         res.send("temporary order table successfully created...");
@@ -68,18 +66,18 @@ app.get("/total", (req, res) => {
     });
 });
 
-app.get("/instock", (req, res) => {
+app.get("/instock", async (req, res) => {
     let sql_select_in_stock = `SELECT * FROM orderTbl`;
-    db.query(sql_select_in_stock, (err, result) => {
+    await db.query(sql_select_in_stock, (err, result) => {
         if (err) throw err;
         console.log(result);
         res.send(result);
     });
 });
 
-app.get("/outofstock", (req, res) => {
+app.get("/outofstock", async (req, res) => {
     let sql_select_out_stock = `SELECT * FROM outOfStockTbl`;
-    db.query(sql_select_out_stock, (err, result) => {
+    await db.query(sql_select_out_stock, (err, result) => {
         if (err) throw err;
         console.log(result);
         res.send(result);
