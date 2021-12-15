@@ -26,23 +26,31 @@ function Invoice(balance /*,items = []*/) {
     //this.date = date;
 }
 
+var incrementor = 0;
+/*
+Creates a temporary table that will hold all order items for one particular order. Out of stock table also
+created because the data that gets sent back is what is available and what is not with a invoice for what 
+was on the order.
+*/
 app.get("/createordertable", (req, res) => {
+    incrementor++;
+    console.log(`createordertable : incrementor value: ${incrementor}`);
     let sql_drop_outofstock_tbl = "DROP TABLE IF EXISTS outOfStockTbl";
     db.query(sql_drop_outofstock_tbl, (err, result) => {
         if (err) throw err;
-        console.log(result);
+        //console.log(`createordertable : after drop outOfStockTbl result :${result}`);
     });
     let sql_drop_order_tbl = "DROP TABLE IF EXISTS orderTbl";
     db.query(sql_drop_order_tbl, (err, result) => {
         if (err) throw err;
-        console.log(result);
+        //console.log(`createordertable : after drop orderTbl result :${result}`);
     });
     //-------------
     let sql_create_outofstock_tbl =
         "CREATE TABLE outOfStockTbl(id INT NOT NULL AUTO_INCREMENT, itemId INT, itemName VARCHAR(130), PRIMARY KEY(id))";
     db.query(sql_create_outofstock_tbl, (err, result) => {
         if (err) throw err;
-        console.log(result);
+        //console.log(`createordertable : after create outOfStock result :${result}`);
     });
     //------------
     let sql_create_order_tbl =
@@ -50,43 +58,53 @@ app.get("/createordertable", (req, res) => {
     itemPrice DECIMAL(5,2), PRIMARY KEY(id))";
     db.query(sql_create_order_tbl, (err, result) => {
         if (err) throw err;
-        console.log(result);
+        //console.log(`createordertable : after create orderTbl result :${result}`);
         res.send("temporary order table successfully created...");
     });
 });
-//;
 
+/*
+Calculates the invoice total for the order by running a SQL query SUM on the temporary order table
+*/
 app.get("/total", (req, res) => {
+    incrementor++;
+    console.log(`total : incrementor value: ${incrementor}`);
     let sql_sum_price = `SELECT SUM(itemPrice) FROM orderTbl WHERE id > 0`;
     db.query(sql_sum_price, (err, result) => {
         if (err) throw err;
-        console.log(result);
-        //var o = JSON.stringify(result).split(":");
-        //var response = o.replace(/}]/gi,'');
-        //var responseMsg = `The order's total comes out to ${response}`;
+        //console.log(`total result :${result}`);
         res.send(result);
     });
 });
 
+/*
+
+*/
 app.get("/instock", (req, res) => {
+    incrementor++;
+    console.log(`instock : incrementor value: ${incrementor}`);
     let sql_select_in_stock = `SELECT * FROM orderTbl`;
     db.query(sql_select_in_stock, (err, result) => {
         if (err) throw err;
-        console.log(result);
+        //console.log(`instock result :${result}`);
         res.send(result);
     });
 });
 
 app.get("/outofstock", (req, res) => {
+    incrementor++;
+    console.log(`outofstock : incrementor value: ${incrementor}`);
     let sql_select_out_stock = `SELECT * FROM outOfStockTbl`;
     db.query(sql_select_out_stock, (err, result) => {
         if (err) throw err;
-        console.log(result);
+        //console.log(`outofstock result :${result}`);
         res.send(result);
     });
 });
 
 app.get("/getitems/:id", (req, res) => {
+    incrementor++;
+    console.log(`getitems : incrementor value: ${incrementor}`);
     //console.log(`--------------------------------------------------------------${req.params.id}`);
     let sql_select_by_id = `SELECT * FROM Inventory WHERE id = '${req.params.id}'`;
 
@@ -102,9 +120,7 @@ app.get("/getitems/:id", (req, res) => {
         var type = Number(oItems[5].substring(7));
         var discount = oItems[6].substring(11).replace(/"/gi, "");
 
-        console.log(
-            `${itemId}, ${sku}, ${name}, ${price}, ${quantity}, ${type}, ${discount}`
-        );
+        //console.log(`${itemId}, ${sku}, ${name}, ${price}, ${quantity}, ${type}, ${discount}`);
 
         if (quantity < 1) {
             let sql_insert_order_tbl = `INSERT INTO outOfStockTbl(itemId, itemName) VALUES(${itemId}, ${name})`;
@@ -126,29 +142,12 @@ app.get("/getitems/:id", (req, res) => {
                 let QuantityLeftMsg = `After this transaction we will have ${
                     quantity - 1
                 } left in stock`;
-                console.log(QuantityLeftMsg);
+                //console.log(QuantityLeftMsg);
             });
         }
     });
 });
 
-//let sql3 = `UPDATE Inventory SET quantity = ${quantity - 1} WHERE id = ${req.params.id}`;
-//let query3 = db.query(sql3, (err, results) => {
-//    if(err) throw err;
-//    let QuantityLeftMsg = `After this transaction we will have ${quantity - 1} left in stock`;
-//console.log(QuantityLeftMsg);
-//})
-//let query4 = db.query(sql3, (err, results) => {
-//if(err) throw err;
-//var o = JSON.stringify(results);
-//let oItems = o.split(':');
-//let total = oItems[1].substring(1).replace(/"}]/gi, '');
-//console.log(total);
-//Invoice.lastRun = new Invoice(total);
-//console.log(Invoice.lastRun.balance)
-//res.send(Invoice.lastRun.balance + itemResults)
-//res.send(Invoice.lastRun.balance)
-//})
 
 app.get("/", (req, res) => {
     console.log("hello world");
